@@ -1,0 +1,549 @@
+<html><head><base href="https://websim.ai" />
+<title>kreAImages - AI Image Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Audiowide&display=swap');
+
+  :root {
+    --primary-yellow: #FFD700;
+    --secondary-yellow: #FFA500;
+    --primary-black: #1A1A1A;
+    --secondary-black: #333333;
+    --accent-yellow: #FFFF00;
+  }
+
+  body, html {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--primary-black);
+    color: var(--primary-yellow);
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .header {
+    background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-yellow));
+    color: var(--primary-black);
+    padding: 20px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .header img {
+    width: 150px;
+    height: 150px;
+    margin-right: 40px;
+  }
+  .header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  h1 {
+    font-family: 'Audiowide', cursive;
+    margin: 0;
+    font-size: 3.5em;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  }
+  .subtitle {
+    color: var(--secondary-black);
+    font-size: 1.2em;
+    margin-top: 10px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .container {
+    flex: 1;
+    display: flex;
+    padding: 20px;
+  }
+  .sidebar {
+    background-color: var(--secondary-black);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(255,215,0,0.1);
+    width: 300px;
+    margin-right: 20px;
+  }
+  #imageForm {
+    display: flex;
+    flex-direction: column;
+  }
+  label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--primary-yellow);
+    font-weight: 600;
+  }
+  input[type="text"], select, textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 2px solid var(--primary-yellow);
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background-color: var(--primary-black);
+    color: var(--primary-yellow);
+  }
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+    max-height: 300px;
+    width: calc(100% - 26px); /* Adjust width to match other fields */
+  }
+  input[type="text"]:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent-yellow);
+    box-shadow: 0 0 0 3px rgba(255,255,0,0.2);
+  }
+  select {
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23FFD700%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 15px top 50%;
+    background-size: 12px auto;
+    padding-right: 45px;
+  }
+  button {
+    background: linear-gradient(45deg, var(--primary-yellow), var(--secondary-yellow));
+    color: var(--primary-black);
+    padding: 14px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+    display: block;
+    width: 100%;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  button:hover {
+    background: linear-gradient(45deg, var(--secondary-yellow), var(--primary-yellow));
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+  }
+  #result {
+    flex: 1;
+    overflow-y: auto;
+  }
+  .image-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 20px;
+  }
+  .image-container {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(255,215,0,0.2);
+    transition: all 0.3s ease;
+  }
+  .image-container:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(255,215,0,0.3);
+  }
+  .image-container img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+  .image-container:hover img {
+    transform: scale(1.05);
+  }
+  .glow-in-dark {
+    position: relative;
+  }
+  .glow-in-dark::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,255,0,0.3);
+    mix-blend-mode: screen;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .glow-in-dark:hover::after {
+    opacity: 1;
+  }
+  .old-cartoon {
+    filter: grayscale(100%) contrast(120%) brightness(90%);
+  }
+  .old-cartoon::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/png;base64,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');
+    opacity: 0.1;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .progress-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--primary-yellow);
+    font-size: 24px;
+    font-weight: bold;
+  }
+  .seventies-filter {
+    filter: saturate(130%) contrast(110%) brightness(110%);
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <img src="https://jimdo-storage.freetls.fastly.net/image/464527516/704e03de-82fe-43cd-8b21-3bf19217351e.png?quality=80,90&auto=webp&disable=upscale&width=480&height=480&trim=0,0,0,0" alt="kreAImages logo" width="150" height="150">
+  <div class="header-content">
+    <h1>kreAImages</h1>
+    <p class="subtitle"><strong>Crafted with passion by Max Casu - Unleash your imagination</strong></p>
+  </div>
+</div>
+<div class="container">
+  <div class="sidebar">
+    <form id="imageForm" method="GET" action="https://websim.ai">
+      <label for="prompt">Image Prompt:</label>
+      <textarea id="prompt" name="prompt" required placeholder="Describe the image you want to generate"></textarea>
+      
+      <label for="style">Image Style:</label>
+      <select id="style" name="style">
+        <option value="hyper-realistic">Hyper-Realistic</option>
+        <option value="3d">3D</option>
+        <option value="old-cartoon-30s">Old cartoon 30s</option>
+        <option value="70s">70s</option>
+        <option value="80s">80s</option>
+        <option value="abstract">Abstract</option>
+        <option value="anime">Anime</option>
+        <option value="cartoon">Cartoon</option>
+        <option value="cinematic">Cinematic</option>
+        <option value="cinematic-horror">Cinematic Horror</option>
+        <option value="claymation">Claymation</option>
+        <option value="comic-book">Comic Book</option>
+        <option value="creepy">Creepy</option>
+        <option value="cyberpunk">Cyberpunk</option>
+        <option value="glow-in-the-dark">Glow in the Dark</option>
+        <option value="gta">GTA</option>
+        <option value="mad-max">Mad Max</option>
+        <option value="mangaka">Mangaka</option>
+        <option value="midjourney">Midjourney</option>
+        <option value="neon-led-light">Neon LED Light</option>
+        <option value="oil-painting">Oil Painting</option>
+        <option value="origami">Origami</option>
+        <option value="pixar">Pixar</option>
+        <option value="science-fiction">Science Fiction</option>
+        <option value="sketch">Sketch</option>
+        <option value="surreal">Surreal</option>
+        <option value="vintage">Vintage</option>
+        <option value="watercolor">Watercolor</option>
+      </select>
+      
+      <label for="camera">Camera:</label>
+      <select id="camera" name="camera">
+        <option value="none">None</option>
+        <option value="dslr">DSLR</option>
+        <option value="mirrorless">Mirrorless</option>
+        <option value="polaroid">Polaroid</option>
+        <option value="disposable">Disposable</option>
+        <option value="pinhole">Pinhole</option>
+        <option value="large-format">Large Format</option>
+        <option value="medium-format">Medium Format</option>
+        <option value="rangefinder">Rangefinder</option>
+        <option value="point-and-shoot">Point and Shoot</option>
+        <option value="smartphone">Smartphone</option>
+        <option value="action-cam">Action Camera</option>
+        <option value="360-camera">360 Camera</option>
+        <option value="drone">Drone Camera</option>
+        <option value="film">Film Camera</option>
+        <option value="instant">Instant Camera</option>
+        <option value="lomography">Lomography</option>
+        <option value="toy-camera">Toy Camera</option>
+        <option value="vintage-camera">Vintage Camera</option>
+      </select>
+      
+      <label for="viewpoint">Viewpoint:</label>
+      <select id="viewpoint" name="viewpoint">
+        <option value="none">None</option>
+        <option value="close-up">Close-up</option>
+        <option value="medium-shot">Medium Shot</option>
+        <option value="wide-angle">Wide Angle</option>
+        <option value="aerial">Aerial</option>
+        <option value="birds-eye">Bird's Eye</option>
+        <option value="worms-eye">Worm's Eye</option>
+        <option value="first-person">First Person</option>
+        <option value="over-the-shoulder">Over the Shoulder</option>
+        <option value="dutch-angle">Dutch Angle</option>
+        <option value="panoramic">Panoramic</option>
+        <option value="fisheye">Fisheye</option>
+        <option value="macro">Macro</option>
+        <option value="telephoto">Telephoto</option>
+      </select>
+      
+      <label for="lighting">Lighting:</label>
+      <select id="lighting" name="lighting">
+        <option value="none">None</option>
+        <option value="natural">Natural</option>
+        <option value="studio">Studio</option>
+        <option value="golden-hour">Golden Hour</option>
+        <option value="blue-hour">Blue Hour</option>
+        <option value="dramatic">Dramatic</option>
+        <option value="low-key">Low Key</option>
+        <option value="high-key">High Key</option>
+        <option value="backlit">Backlit</option>
+        <option value="soft-box">Soft Box</option>
+        <option value="ring-light">Ring Light</option>
+        <option value="neon">Neon</option>
+        <option value="candlelight">Candlelight</option>
+        <option value="moonlight">Moonlight</option>
+        <option value="fire">Fire</option>
+        <option value="underwater">Underwater</option>
+      </select>
+      
+      <label for="aspect-ratio">Aspect Ratio:</label>
+      <select id="aspect-ratio" name="aspect-ratio">
+        <option value="1:1">1:1 (Square)</option>
+        <option value="4:3">4:3</option>
+        <option value="3:4">3:4</option>
+        <option value="3:2">3:2</option>
+        <option value="2:3">2:3</option>
+        <option value="16:9">16:9 (Widescreen)</option>
+        <option value="21:9">21:9 (Ultrawide)</option>
+        <option value="9:16">9:16 (Portrait)</option>
+      </select>
+      
+      <label for="image-count">Number of Images:</label>
+      <select id="image-count" name="image-count">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+      </select>
+      
+      <button type="submit">Generate Images</button>
+    </form>
+  </div>
+  
+  <div id="result">
+    <!-- Generated images will be displayed here -->
+  </div>
+</div>
+
+<script>
+document.getElementById('imageForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const prompt = document.getElementById('prompt').value;
+  const style = document.getElementById('style').value;
+  const camera = document.getElementById('camera').value;
+  const viewpoint = document.getElementById('viewpoint').value;
+  const lighting = document.getElementById('lighting').value;
+  const aspectRatio = document.getElementById('aspect-ratio').value;
+  const imageCount = parseInt(document.getElementById('image-count').value);
+  
+  generateImages(prompt, style, camera, viewpoint, lighting, aspectRatio, imageCount);
+});
+
+function generateImages(prompt, style, camera, viewpoint, lighting, aspectRatio, imageCount) {
+  const result = document.getElementById('result');
+  result.innerHTML = '<p style="text-align: center; padding: 20px; color: var(--primary-yellow);">Generating images... Please wait.</p>';
+  
+  // Simulate API delay
+  setTimeout(() => {
+    const [width, height] = getImageDimensions(aspectRatio);
+    
+    let imagesHtml = `
+      <div class="image-grid">
+    `;
+    
+    for (let i = 0; i < imageCount; i++)  {
+      const imageUrl = generateStylizedImageUrl(prompt, style, camera, viewpoint, lighting, width, height,  i);
+      imagesHtml += `
+        <div class="image-container ${style === 'glow-in-the-dark' ? 'glow-in-dark' : ''} ${style === 'old-cartoon-30s' ? 'old-cartoon' : ''} ${style === '70s' ? 'seventies-filter' : ''}" style="padding-bottom: ${(height / width * 100)}%;">
+          <img src="${imageUrl}" alt="kreAImages Generated ${i + 1}" width="${width}" height="${height}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;">
+          <div class="progress-overlay">0%</div>
+        </div>
+      `;
+    }
+    
+    imagesHtml += '</div>';
+    
+    result.innerHTML = imagesHtml;
+    
+    // Simulate progress
+    const containers = result.querySelectorAll('.image-container');
+    containers.forEach((container, index) => {
+      simulateProgress(container, index);
+    });
+  }, 2000);
+}
+
+function simulateProgress(container, index) {
+  let progress = 0;
+  const overlay = container.querySelector('.progress-overlay');
+  const interval = setInterval(() => {
+    progress += Math.random() * 10;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(interval);
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 500);
+    }
+    overlay.textContent = `${Math.round(progress)}%`;
+  }, 200 + index * 50);
+}
+
+function generateStylizedImageUrl(prompt, style, camera, viewpoint, lighting, width, height, index) {
+  // This function simulates generating a stylized image URL
+  // In a real implementation, this would call an actual AI image generation API
+  const baseUrl = 'https://source.unsplash.com';
+  let stylizedPrompt = prompt;
+  
+  switch(style) {
+    case 'hyper-realistic':
+      stylizedPrompt += ' ultra detailed hdr 8k';
+      break;
+    case '3d':
+      stylizedPrompt += ' 3D render, volumetric lighting, depth, high-quality textures, realistic materials';
+      break;
+    case 'old-cartoon-30s':
+      stylizedPrompt += ' 1930s cartoon style, black and white, rubber hose animation, vintage animation, early Disney, Fleischer Studios';
+      break;
+    case '70s':
+      stylizedPrompt += ' 1970s style, retro, vintage, warm colors, disco era, bell-bottom pants, lava lamps, funky patterns, platform shoes, afros, vinyl records, psychedelic posters, wood paneling, shag carpets, macramé, vintage cars, polaroid cameras';
+      break;
+    case '80s':
+      stylizedPrompt += ' 1980s style, neon colors, synthwave, retro futurism, bold geometric patterns, Miami Vice aesthetic';
+      break;
+    case 'abstract':
+      stylizedPrompt += ' abstract art, non-representational, shapes, colors, forms';
+      break;
+    case 'anime':
+      stylizedPrompt += ' anime style, Japanese animation, big eyes, colorful hair';
+      break;
+    case 'cartoon':
+      stylizedPrompt += ' cartoon style, exaggerated features, bold outlines';
+      break;
+    case 'cinematic':
+      stylizedPrompt += ' cinematic, dramatic lighting, wide angle, movie scene, high production value';
+      break;
+    case 'cinematic-horror':
+      stylizedPrompt += ' cinematic horror, dark atmosphere, eerie lighting, suspenseful, high contrast, movie quality';
+      break;
+    case 'claymation':
+      stylizedPrompt += ' claymation style, stop motion, clay figures, textured surface';
+      break;
+    case 'comic-book':
+      stylizedPrompt += ' comic book style bold lines flat colors';
+      break;
+    case 'creepy':
+      stylizedPrompt += ' dark eerie spooky';
+      break;
+    case 'cyberpunk':
+      stylizedPrompt += ' cyberpunk, futuristic, neon lights, high tech low life';
+      break;
+    case 'glow-in-the-dark':
+      stylizedPrompt += ' luminescent phosphorescent glowing in darkness ectoplasmic green fluorescence';
+      break;
+    case 'gta':
+      stylizedPrompt += ' grand theft auto style video game graphics';
+      break;
+    case 'mad-max':
+      stylizedPrompt += ' post-apocalyptic, dusty, gritty, rusted metal, desert wasteland, intense action, Mad Max style';
+      break;
+    case 'mangaka':
+      stylizedPrompt += ' manga style, black and white, high contrast, detailed linework, dynamic poses, expressive characters';
+      break;
+    case 'midjourney':
+      stylizedPrompt += ' highly detailed, intricate, vibrant colors, dramatic lighting, in the style of Midjourney AI';
+      break;
+    case 'neon-led-light':
+      stylizedPrompt += ' neon led light glowing vibrant colors';
+      break;
+    case 'oil-painting':
+      stylizedPrompt += ' oil painting, textured canvas, brush strokes, rich colors';
+      break;
+    case 'origami':
+      stylizedPrompt += ' origami style, folded paper, crisp edges, geometric shapes, minimalist design';
+      break;
+    case 'pixar':
+      stylizedPrompt += ' 3D animated, Pixar style, vibrant colors, cute characters, expressive faces';
+      break;
+    case 'science-fiction':
+      stylizedPrompt += ' futuristic, advanced technology, alien worlds, space exploration, dystopian or utopian settings';
+      break;
+    case 'sketch':
+      stylizedPrompt += ' hand-drawn sketch, pencil lines, rough texture, artistic, expressive strokes';
+      break;
+    case 'surreal':
+      stylizedPrompt += ' surrealist art style, dreamlike, bizarre juxtapositions, distorted reality, Salvador Dali inspired';
+      break;
+    case 'vintage':
+      stylizedPrompt += ' retro, nostalgic, faded colors, grainy texture, old photograph look';
+      break;
+    case 'watercolor':
+      stylizedPrompt += ' watercolor painting, soft edges, translucent colors, paper texture';
+      break;
+    default:
+      stylizedPrompt += ` ${style}`;
+  }
+  
+  if (camera !== 'none') {
+    stylizedPrompt += ` ${camera} camera`;
+  }
+  
+  if (viewpoint !== 'none') {
+    stylizedPrompt += ` ${viewpoint} view`;
+  }
+  
+  if (lighting !== 'none') {
+    stylizedPrompt += ` ${lighting} lighting`;
+  }
+  
+  return `${baseUrl}/${width}x${height}/?${encodeURIComponent(stylizedPrompt)}&sig=${index}`;
+}
+
+function getImageDimensions(aspectRatio) {
+  const ratios = {
+    '1:1': [1000, 1000],
+    '4:3': [1600, 1200],
+    '3:4': [1200, 1600],
+    '3:2': [1800, 1200],
+    '2:3': [1200, 1800],
+    '16:9': [1920, 1080],
+    '21:9': [2560, 1080],
+    '9:16': [1080, 1920]
+  };
+  
+  return ratios[aspectRatio] || [1600, 900]; // Default to 16:9 if ratio not found
+}
+</script>
+</body>
+</html>
